@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "@/firebase/firebaseClient";
 
 type Errors = {
   name?: string;
@@ -11,6 +13,7 @@ type Errors = {
   pwd?: string;
   confirm?: string;
   terms?: string;
+  general?: string;
 };
 
 export default function SignupPage() {
@@ -21,12 +24,12 @@ export default function SignupPage() {
   const [pwd, setPwd] = useState("");
   const [confirm, setConfirm] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
-
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
 
+  // Password strength meter
   const score = useMemo(() => {
     let s = 0;
     if (pwd.length >= 8) s++;
@@ -45,6 +48,7 @@ export default function SignupPage() {
     return "Very strong";
   }, [pwd, score]);
 
+  // Validation
   function validate() {
     const next: Errors = {};
     if (!name.trim()) next.name = "Full name is required.";
@@ -62,14 +66,34 @@ export default function SignupPage() {
     return Object.keys(next).length === 0;
   }
 
+  // ✅ Handle Firebase Signup
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
+
     setLoading(true);
+    setErrors({});
     try {
-      await new Promise((r) => setTimeout(r, 1000));
-      alert("Account created (mock). Redirecting to login...");
-      router.push("/login");
+      // Create user
+      const userCredential = await createUserWithEmailAndPassword(auth, email, pwd);
+      const user = userCredential.user;
+
+      // Update display name
+      await updateProfile(user, { displayName: name });
+
+      console.log("✅ User created:", user);
+      alert("Welcome to Mentora!");
+
+      // Redirect directly to profile page
+      router.push("/profile");
+    } catch (error: any) {
+      console.error(error.code, error.message);
+      const next: Errors = {};
+      if (error.code === "auth/email-already-in-use") next.email = "Email already in use.";
+      else if (error.code === "auth/invalid-email") next.email = "Invalid email format.";
+      else if (error.code === "auth/weak-password") next.pwd = "Password is too weak.";
+      else next.general = "Signup failed. Try again later.";
+      setErrors(next);
     } finally {
       setLoading(false);
     }
@@ -88,7 +112,7 @@ export default function SignupPage() {
               width={50}
               height={60}
               priority
-              className="mx-auto mb-3 "
+              className="mx-auto mb-3"
             />
             <h1 className="text-2xl font-semibold text-slate-800">
               Create your Mentora account
@@ -99,6 +123,10 @@ export default function SignupPage() {
           </div>
 
           <form onSubmit={onSubmit} className="space-y-5" noValidate>
+            {errors.general && (
+              <p className="text-center text-sm text-red-600">{errors.general}</p>
+            )}
+
             {/* Full name */}
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">Full name</label>
