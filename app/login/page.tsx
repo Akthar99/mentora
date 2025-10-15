@@ -100,8 +100,8 @@ export default function LoginPage() {
         {/* LEFT PANEL */}
         <div className="relative hidden md:flex flex-col justify-between bg-gradient-to-br from-gray-100 via-gray-200 to-white p-10 text-slate-800">
           <div>
-            <h2 className="text-4xl font-bold tracking-tight text-slate-900">
-              Welcome Back 👋
+            <h2 className="text-5xl font-bold tracking-tight text-slate-900">
+              Welcome
             </h2>
             <p className="mt-2 text-slate-600">
               Continue your AI-powered learning journey with Mentora.
@@ -128,10 +128,10 @@ export default function LoginPage() {
             <Image
               src="/robo.png"
               alt="Mentora robot"
-              width={70}
-              height={70}
+              width={50}
+              height={50}
               priority
-              className="mx-auto mb-3 animate-float"
+              className="mx-auto mb-3"
             />
             <h1 className="text-2xl font-semibold text-slate-800">
               Sign in to Mentora
