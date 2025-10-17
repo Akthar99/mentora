@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "@/firebase/firebaseClient";
 
 type Errors = {
   name?: string;
@@ -11,6 +13,7 @@ type Errors = {
   pwd?: string;
   confirm?: string;
   terms?: string;
+  general?: string;
 };
 
 export default function SignupPage() {
@@ -21,12 +24,16 @@ export default function SignupPage() {
   const [pwd, setPwd] = useState("");
   const [confirm, setConfirm] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
-
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
+  const [status, setStatus] = useState<{ type: "success" | "error" | null; message: string }>({
+    type: null,
+    message: "",
+  });
 
+  // Password strength meter
   const score = useMemo(() => {
     let s = 0;
     if (pwd.length >= 8) s++;
@@ -45,6 +52,7 @@ export default function SignupPage() {
     return "Very strong";
   }, [pwd, score]);
 
+  // Validation
   function validate() {
     const next: Errors = {};
     if (!name.trim()) next.name = "Full name is required.";
@@ -62,23 +70,47 @@ export default function SignupPage() {
     return Object.keys(next).length === 0;
   }
 
+  // ✅ Handle Firebase Signup
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
+
     setLoading(true);
+    setErrors({});
+    setStatus({ type: null, message: "" });
+
     try {
-      await new Promise((r) => setTimeout(r, 1000));
-      alert("Account created (mock). Redirecting to login...");
-      router.push("/login");
+      const userCredential = await createUserWithEmailAndPassword(auth, email, pwd);
+      const user = userCredential.user;
+
+      await updateProfile(user, { displayName: name });
+
+      setStatus({ type: "success", message: "Account created successfully!" });
+
+      // Redirect after short delay
+      setTimeout(() => router.push("/profile"), 2000);
+    } catch (error: any) {
+      console.error(error.code, error.message);
+      const next: Errors = {};
+      if (error.code === "auth/email-already-in-use") next.email = "Email already in use.";
+      else if (error.code === "auth/invalid-email") next.email = "Invalid email format.";
+      else if (error.code === "auth/weak-password") next.pwd = "Password is too weak.";
+      else next.general = "Signup failed. Try again later.";
+      setErrors(next);
+      setStatus({
+        type: "error",
+        message:
+          next.email || next.pwd || next.general || "Signup failed. Please check your input.",
+      });
     } finally {
       setLoading(false);
+      setTimeout(() => setStatus({ type: null, message: "" }), 4000);
     }
   }
 
   return (
     <main className="min-h-dvh flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4">
       <div className="grid w-full max-w-5xl grid-cols-1 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl md:grid-cols-2">
-        
         {/* LEFT SIDE — FORM */}
         <div className="p-8 sm:p-10 flex flex-col justify-center bg-white">
           <div className="text-center mb-6">
@@ -88,7 +120,7 @@ export default function SignupPage() {
               width={50}
               height={60}
               priority
-              className="mx-auto mb-3 "
+              className="mx-auto mb-3"
             />
             <h1 className="text-2xl font-semibold text-slate-800">
               Create your Mentora account
@@ -98,10 +130,29 @@ export default function SignupPage() {
             </p>
           </div>
 
+          {/* ✅ Status message */}
+          {status.type && (
+            <div
+              className={`mb-4 p-3 rounded-md text-sm font-medium transition-all ${
+                status.type === "success"
+                  ? "bg-green-50 text-green-700 border border-green-200"
+                  : "bg-red-50 text-red-700 border border-red-200"
+              }`}
+            >
+              {status.message}
+            </div>
+          )}
+
           <form onSubmit={onSubmit} className="space-y-5" noValidate>
+            {errors.general && (
+              <p className="text-center text-sm text-red-600">{errors.general}</p>
+            )}
+
             {/* Full name */}
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Full name</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">
+                Full name
+              </label>
               <input
                 type="text"
                 className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400"
@@ -114,7 +165,9 @@ export default function SignupPage() {
 
             {/* Email */}
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">
+                Email
+              </label>
               <input
                 type="email"
                 inputMode="email"
@@ -129,7 +182,9 @@ export default function SignupPage() {
 
             {/* Password */}
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Password</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">
+                Password
+              </label>
               <div className="relative">
                 <input
                   type={showPwd ? "text" : "password"}
@@ -168,7 +223,9 @@ export default function SignupPage() {
 
             {/* Confirm password */}
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Confirm password</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">
+                Confirm password
+              </label>
               <div className="relative">
                 <input
                   type={showConfirm ? "text" : "password"}
@@ -206,7 +263,8 @@ export default function SignupPage() {
                 and{" "}
                 <Link href="#" className="text-indigo-600 hover:underline">
                   Privacy Policy
-                </Link>.
+                </Link>
+                .
               </label>
             </div>
             {errors.terms && <p className="mt-1 text-xs text-red-600">{errors.terms}</p>}
@@ -229,7 +287,10 @@ export default function SignupPage() {
 
             <p className="text-center text-sm text-slate-500">
               Already have an account?{" "}
-              <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-700 hover:underline">
+              <Link
+                href="/login"
+                className="font-medium text-indigo-600 hover:text-indigo-700 hover:underline"
+              >
                 Sign in
               </Link>
             </p>
@@ -239,7 +300,9 @@ export default function SignupPage() {
         {/* RIGHT SIDE — GRADIENT PANEL */}
         <div className="relative hidden md:flex flex-col justify-between bg-gradient-to-br from-gray-100 via-gray-200 to-white p-10 text-slate-800">
           <div>
-            <h2 className="text-4xl font-bold tracking-tight text-slate-900">Join Mentora</h2>
+            <h2 className="text-4xl font-bold tracking-tight text-slate-900">
+              Join Mentora
+            </h2>
             <p className="mt-2 text-slate-600 text-sm">
               Explore AI-powered learning tools and elevate your education journey.
             </p>
