@@ -8,7 +8,7 @@ import ProjectCard from '@/components/ProjectCard';
 import NewProjectModal from '@/components/NewProjectModal';
 import AddSourcesModal from '@/components/AddSourcesModal';
 import { Project, ProjectType } from '@/types';
-import { projectsApi } from '@/services/api';
+//import { projectsApi } from '@/services/api';
 
 const filterOptions = ['All Projects', 'Study', 'Flash Cards', 'Exam Papers'];
 
@@ -28,8 +28,8 @@ export default function Home() {
   const loadProjects = async () => {
     try {
       setIsLoading(true);
-      const data = await projectsApi.getAll();
-      setProjects(data);
+     // const data = await projectsApi.getAll();
+     // setProjects(data);
     } catch (error) {
       console.error('Error loading projects:', error);
       setProjects([]);

@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import Header from '@/components/Header';
 import { Project } from '@/types';
-import { projectsApi } from '@/services/api';
+//import { projectsApi } from '@/services/api';
 
 export default function ProjectPage() {
   const params = useParams();
@@ -22,8 +22,8 @@ export default function ProjectPage() {
   const loadProject = async () => {
     try {
       setIsLoading(true);
-      const data = await projectsApi.getById(projectId);
-      setProject(data);
+     // const data = await projectsApi.getById(projectId);
+    //  setProject(data);
     } catch (error) {
       console.error('Error loading project:', error);
     } finally {
