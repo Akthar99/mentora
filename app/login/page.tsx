@@ -26,7 +26,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
 
-  // 🔹 Validation
   function validate() {
     const next: Errors = {};
     if (!email.trim()) next.email = "Email is required.";
@@ -37,26 +36,16 @@ export default function LoginPage() {
     return Object.keys(next).length === 0;
   }
 
-  // 🔹 Google Sign-In (detect first-time users)
   async function handleGoogleLogin() {
     setLoading(true);
     setErrors({});
     try {
       const result = await signInWithPopup(auth, googleProvider);
-
-      // ✅ Extract user info safely
       const info = getAdditionalUserInfo(result);
       const isNewUser = info?.isNewUser;
 
-      console.log("✅ Google user:", result.user);
-      console.log("🆕 Is new user:", isNewUser);
-
-      // Redirect based on user type
-      if (isNewUser) {
-        router.push("/profile");
-      } else {
-        router.push("/dashboard");
-      }
+      if (isNewUser) router.push("/profile");
+      else router.push("/dashboard");
     } catch (error: any) {
       console.error("Google Sign-In Error:", error);
       setErrors({ general: "Google sign-in failed. Please try again." });
@@ -65,7 +54,6 @@ export default function LoginPage() {
     }
   }
 
-  // 🔹 Email/Password Login
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
@@ -97,7 +85,7 @@ export default function LoginPage() {
   return (
     <main className="min-h-dvh flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4">
       <div className="grid w-full max-w-5xl grid-cols-1 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl md:grid-cols-2">
-        {/* LEFT PANEL */}
+        {/* LEFT PANEL - unchanged */}
         <div className="relative hidden md:flex flex-col justify-between bg-gradient-to-br from-gray-100 via-gray-200 to-white p-10 text-slate-800">
           <div>
             <h2 className="text-5xl font-bold tracking-tight text-slate-900">
@@ -122,42 +110,39 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* RIGHT PANEL */}
-        <div className="p-8 sm:p-10 flex flex-col justify-center bg-white">
-          <div className="text-center mb-6">
+        {/* RIGHT PANEL - restyled clean version */}
+        <div className="p-12 flex flex-col justify-center bg-white">
+          <div className="text-center mb-8">
             <Image
               src="/robo.png"
               alt="Mentora robot"
-              width={50}
-              height={50}
-              priority
-              className="mx-auto mb-3"
+              width={60}
+              height={60}
+              className="mx-auto mb-4"
             />
-            <h1 className="text-2xl font-semibold text-slate-800">
+            <h1 className="text-3xl font-semibold text-slate-900">
               Sign in to Mentora
             </h1>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-gray-500 mt-2">
               Welcome back! Please enter your details.
             </p>
           </div>
 
-          <form onSubmit={onSubmit} className="space-y-5" noValidate>
+          <form onSubmit={onSubmit} className="space-y-6" noValidate>
             {errors.general && (
-              <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">
+              <div className="rounded-md bg-red-50 p-3 text-sm text-red-700 border border-red-200">
                 {errors.general}
               </div>
             )}
 
             {/* Email */}
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email
               </label>
               <input
                 type="email"
-                inputMode="email"
-                autoComplete="email"
-                className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400"
+                className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-800 placeholder:text-gray-400 outline-none focus:border-black focus:ring-1 focus:ring-black"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -169,14 +154,13 @@ export default function LoginPage() {
 
             {/* Password */}
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Password
               </label>
               <div className="relative">
                 <input
                   type={showPwd ? "text" : "password"}
-                  autoComplete="current-password"
-                  className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 pr-10 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400"
+                  className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-2 pr-10 text-sm text-gray-800 placeholder:text-gray-400 outline-none focus:border-black focus:ring-1 focus:ring-black"
                   placeholder="********"
                   value={pwd}
                   onChange={(e) => setPwd(e.target.value)}
@@ -184,7 +168,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPwd((v) => !v)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-600 hover:text-indigo-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-600 hover:text-black"
                 >
                   {showPwd ? "Hide" : "Show"}
                 </button>
@@ -196,16 +180,16 @@ export default function LoginPage() {
 
             {/* Remember + Forgot */}
             <div className="flex items-center justify-between text-sm">
-              <label className="inline-flex items-center gap-2 text-slate-600">
+              <label className="inline-flex items-center gap-2 text-gray-600">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
                 />
                 Remember me
               </label>
               <Link
                 href="/forgot-password"
-                className="text-indigo-600 hover:underline hover:text-indigo-700"
+                className="text-black hover:underline"
               >
                 Forgot password?
               </Link>
@@ -215,23 +199,16 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white transition-all hover:bg-indigo-700 hover:shadow-lg focus:ring-2 focus:ring-indigo-500 disabled:opacity-60"
+              className="w-full rounded-full bg-black py-2.5 text-sm font-medium text-white transition-all hover:bg-gray-900 hover:shadow-md disabled:opacity-60"
             >
-              {loading ? (
-                <span className="inline-flex items-center gap-2">
-                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-indigo-300 border-t-white" />
-                  Signing in…
-                </span>
-              ) : (
-                "Sign In"
-              )}
+              {loading ? "Signing in…" : "Sign In"}
             </button>
 
             {/* Divider */}
             <div className="flex items-center gap-3">
-              <div className="h-px flex-1 bg-slate-200" />
-              <span className="text-xs text-slate-500">or continue with</span>
-              <div className="h-px flex-1 bg-slate-200" />
+              <div className="h-px flex-1 bg-gray-200" />
+              <span className="text-xs text-gray-500">or continue with</span>
+              <div className="h-px flex-1 bg-gray-200" />
             </div>
 
             {/* Google Sign-In */}
@@ -239,18 +216,18 @@ export default function LoginPage() {
               type="button"
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="flex items-center justify-center gap-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-all disabled:opacity-60"
+              className="flex items-center justify-center gap-2 w-full rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-all disabled:opacity-60"
             >
               <GoogleIcon className="h-5 w-5" />
               Sign in with Google
             </button>
 
             {/* Signup link */}
-            <p className="text-center text-sm text-slate-500">
+            <p className="text-center text-sm text-gray-500">
               Don’t have an account?{" "}
               <Link
                 href="/signup"
-                className="font-medium text-indigo-600 hover:text-indigo-700 hover:underline"
+                className="font-medium text-black hover:underline"
               >
                 Create one
               </Link>
@@ -262,7 +239,6 @@ export default function LoginPage() {
   );
 }
 
-// 🔹 Google Icon
 function GoogleIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
