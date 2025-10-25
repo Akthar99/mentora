@@ -5,27 +5,44 @@ import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import Header from '@/components/Header';
 import { Project } from '@/types';
-import { projectsApi } from '@/services/api';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/firebase/firebaseClient';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ProjectPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
   const projectId = params.id as string;
 
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadProject();
-  }, [projectId]);
+    if (user && projectId) {
+      loadProject();
+    }
+  }, [projectId, user]);
 
   const loadProject = async () => {
     try {
       setIsLoading(true);
-      const data = await projectsApi.getById(projectId);
-      setProject(data);
+      const projectRef = doc(db, 'projects', projectId);
+      const projectSnap = await getDoc(projectRef);
+
+      if (projectSnap.exists()) {
+        const projectData = {
+          id: projectSnap.id,
+          ...projectSnap.data()
+        } as Project;
+        setProject(projectData);
+      } else {
+        console.error('Project not found');
+        router.push('/dashboard');
+      }
     } catch (error) {
       console.error('Error loading project:', error);
+      router.push('/dashboard');
     } finally {
       setIsLoading(false);
     }
@@ -37,11 +54,11 @@ export default function ProjectPage() {
 
       <main className="max-w-4xl mx-auto px-6 py-12">
         <button
-          onClick={() => router.push('/')}
+          onClick={() => router.push('/dashboard')}
           className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-8 transition"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span className="font-medium">Back to Projects</span>
+          <span className="font-medium">Back to Dashboard</span>
         </button>
 
         {isLoading ? (

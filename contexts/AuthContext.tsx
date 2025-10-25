@@ -22,6 +22,7 @@ interface UserData {
   interests: string;
   email?: string;
   photoURL?: string;
+  isPremium?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -84,6 +85,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           interests: "",
           email: currentUser.email || "",
           photoURL: currentUser.photoURL || "",
+          isPremium: false,
           createdAt: new Date().toISOString(),
         };
         await setDoc(docRef, initialData, { merge: true });
@@ -126,6 +128,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         interests: "",
         email: userCredential.user.email || "",
         photoURL: userCredential.user.photoURL || "",
+        isPremium: false,
         createdAt: new Date().toISOString(),
       };
       

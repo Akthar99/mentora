@@ -124,7 +124,7 @@ export default function QuestionGenerator() {
                   <option value="">Choose a document</option>
                   {documents.map((doc, index) => (
                     <option key={doc.id || index} value={doc.id}>
-                      {doc.name}
+                      {doc.name || doc.filename || `Document ${index + 1}`}
                     </option>
                   ))}
                 </select>
@@ -151,7 +151,7 @@ export default function QuestionGenerator() {
                   max="20"
                   value={numQuestions}
                   onChange={(e) => setNumQuestions(parseInt(e.target.value))}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900"
                 />
               </div>
 

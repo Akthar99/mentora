@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSearchParams } from 'next/navigation';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import FlashcardView from '@/components/FlashcardView';
 
 interface Flashcard {
   question: string;
@@ -18,7 +20,6 @@ export default function Flashcards() {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [generating, setGenerating] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
-  const [showAnswer, setShowAnswer] = useState(false);
   
   const { user } = useAuth();
   const searchParams = useSearchParams();
@@ -62,7 +63,7 @@ export default function Flashcards() {
     try {
       // Find the selected document to get its name
       const selectedDoc = documents.find(doc => doc.id === selectedDocument);
-      const documentName = selectedDoc?.name || selectedDoc?.filename || 'document';
+      const documentName = selectedDoc ? (selectedDoc.name || selectedDoc.filename || 'document') : 'document';
 
       const response = await fetch('http://localhost:8000/api/generate-flashcards', {
         method: 'POST',
@@ -110,20 +111,18 @@ export default function Flashcards() {
 
   const nextCard = () => {
     setCurrentCard((prev) => (prev + 1) % flashcards.length);
-    setShowAnswer(false);
   };
 
   const prevCard = () => {
     setCurrentCard((prev) => (prev - 1 + flashcards.length) % flashcards.length);
-    setShowAnswer(false);
   };
 
   // Get the selected document name for display
-  const selectedDocName = documents.find(doc => doc.id === selectedDocument)?.name || 'Selected Document';
+  const selectedDoc = documents.find(doc => doc.id === selectedDocument);
+  const selectedDocName = selectedDoc ? (selectedDoc.name || selectedDoc.filename || 'Selected Document') : 'Selected Document';
 
   return (
-    <div className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
-      <div className="px-4 py-6 sm:px-0">
+    <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Generation Form */}
         <div className="bg-white shadow rounded-lg mb-8">
           <div className="px-4 py-5 sm:p-6">
@@ -168,7 +167,7 @@ export default function Flashcards() {
                   type="text"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900"
                   placeholder="e.g., Computer Science, Biology, History"
                 />
                 <p className="mt-1 text-xs text-gray-500">
@@ -210,79 +209,50 @@ export default function Flashcards() {
                 </p>
               </div>
 
-              <div className="max-w-md mx-auto">
-                <div 
-                  className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-md p-8 min-h-64 cursor-pointer transform transition-transform hover:scale-105"
-                  onClick={() => setShowAnswer(!showAnswer)}
-                >
-                  {!showAnswer ? (
-                    <div className="text-center h-full flex flex-col justify-center">
-                      <h4 className="text-xl font-semibold text-gray-900 mb-4">
-                        {flashcards[currentCard].question}
-                      </h4>
-                      <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
-                        <p className="text-sm text-yellow-800">
-                          💡 Hint: {flashcards[currentCard].hint}
-                        </p>
-                      </div>
-                      <p className="text-sm text-gray-500 mt-6">Click card to reveal answer</p>
-                    </div>
-                  ) : (
-                    <div className="text-center h-full flex flex-col justify-center">
-                      <h4 className="text-xl font-semibold text-green-600 mb-4">Answer</h4>
-                      <p className="text-lg text-gray-700 leading-relaxed">
-                        {flashcards[currentCard].answer}
-                      </p>
-                      <div className="mt-4 p-2 bg-gray-100 rounded-lg">
-                        <p className="text-sm text-gray-600">
-                          Concept: {flashcards[currentCard].concept}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
+              <div className="max-w-lg mx-auto">
+                <FlashcardView flashcard={flashcards[currentCard]} />
 
-                <div className="flex justify-between mt-6">
+                <div className="flex items-center justify-between mt-8">
                   <button
                     onClick={prevCard}
                     disabled={flashcards.length <= 1}
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center space-x-2 px-5 py-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium text-gray-700"
                   >
-                    ← Previous
+                    <ChevronLeft className="w-5 h-5" />
+                    <span>Previous</span>
                   </button>
-                  <button
-                    onClick={() => setShowAnswer(!showAnswer)}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-                  >
-                    {showAnswer ? 'Show Question' : 'Show Answer'}
-                  </button>
+
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500">
+                      Card {currentCard + 1} of {flashcards.length}
+                    </p>
+                    <div className="flex space-x-1 mt-2">
+                      {flashcards.map((_, index) => (
+                        <div
+                          key={index}
+                          className={`h-1.5 rounded-full transition-all ${
+                            index === currentCard
+                              ? 'w-8 bg-blue-600'
+                              : 'w-1.5 bg-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
                   <button
                     onClick={nextCard}
                     disabled={flashcards.length <= 1}
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center space-x-2 px-5 py-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium text-gray-700"
                   >
-                    Next →
+                    <span>Next</span>
+                    <ChevronRight className="w-5 h-5" />
                   </button>
-                </div>
-              </div>
-
-              {/* Progress indicator */}
-              <div className="mt-6">
-                <div className="flex justify-center space-x-1">
-                  {flashcards.map((_, index) => (
-                    <div
-                      key={index}
-                      className={`h-2 w-2 rounded-full ${
-                        index === currentCard ? 'bg-indigo-600' : 'bg-gray-300'
-                      }`}
-                    />
-                  ))}
                 </div>
               </div>
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 }

@@ -36,9 +36,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   const Icon = iconMap[project.type] || BookOpen;
   const colors = colorMap[project.type] || colorMap['Study'];
 
-  const href = project.type === 'Flash Cards'
-    ? `/flashcards/${project.id}`
-    : `/projects/${project.id}`;
+  const href = `/dashboard/projects/${project.id}`;
 
   return (
     <Link href={href}>

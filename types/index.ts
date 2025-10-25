@@ -5,9 +5,11 @@ export interface Project {
   title: string;
   description: string;
   type: ProjectType;
+  userId: string;
   createdAt: string;
-  icon: string;
-  color: string;
+  updatedAt?: string;
+  icon?: string;
+  color?: string;
 }
 
 export interface Flashcard {
@@ -16,4 +18,14 @@ export interface Flashcard {
   question: string;
   answer: string;
   createdAt: string;
+}
+
+export interface Document {
+  id: string;
+  projectId: string;
+  name: string;
+  filename?: string;
+  size?: number;
+  uploadDate: string;
+  userId: string;
 }

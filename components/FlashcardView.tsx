@@ -4,7 +4,12 @@ import { useState } from 'react';
 import { Flashcard } from '@/types';
 
 interface FlashcardViewProps {
-  flashcard: Flashcard;
+  flashcard: Flashcard | {
+    question: string;
+    hint?: string;
+    answer: string;
+    concept?: string;
+  };
 }
 
 export default function FlashcardView({ flashcard }: FlashcardViewProps) {
@@ -13,7 +18,7 @@ export default function FlashcardView({ flashcard }: FlashcardViewProps) {
   return (
     <div
       onClick={() => setIsFlipped(!isFlipped)}
-      className="relative w-full h-80 cursor-pointer perspective-1000"
+      className="relative w-full h-96 cursor-pointer perspective-1000"
     >
       <div
         className={`relative w-full h-full transition-transform duration-500 transform-style-3d ${
@@ -23,7 +28,16 @@ export default function FlashcardView({ flashcard }: FlashcardViewProps) {
         <div className="absolute w-full h-full backface-hidden">
           <div className="w-full h-full bg-white rounded-2xl border-2 border-gray-200 p-8 flex flex-col items-center justify-center shadow-lg">
             <p className="text-sm text-gray-500 mb-4 uppercase tracking-wide font-medium">Question</p>
-            <p className="text-xl font-semibold text-gray-900 text-center">{flashcard.question}</p>
+            <div className="flex-1 overflow-auto w-full">
+              <p className="text-xl font-semibold text-gray-900 text-center">{flashcard.question}</p>
+            </div>
+            {'hint' in flashcard && flashcard.hint && (
+              <div className="mt-4 p-3 bg-yellow-50 rounded-lg w-full">
+                <p className="text-sm text-yellow-800">
+                  💡 Hint: {flashcard.hint}
+                </p>
+              </div>
+            )}
             <p className="text-sm text-gray-400 mt-6">Click to flip</p>
           </div>
         </div>
@@ -31,7 +45,16 @@ export default function FlashcardView({ flashcard }: FlashcardViewProps) {
         <div className="absolute w-full h-full backface-hidden rotate-y-180">
           <div className="w-full h-full bg-blue-600 rounded-2xl border-2 border-blue-700 p-8 flex flex-col items-center justify-center shadow-lg">
             <p className="text-sm text-blue-200 mb-4 uppercase tracking-wide font-medium">Answer</p>
-            <p className="text-xl font-semibold text-white text-center">{flashcard.answer}</p>
+            <div className="flex-1 overflow-auto w-full">
+              <p className="text-xl font-semibold text-white text-center">{flashcard.answer}</p>
+            </div>
+            {'concept' in flashcard && flashcard.concept && (
+              <div className="mt-4 p-2 bg-blue-500 rounded-lg w-full">
+                <p className="text-sm text-blue-100">
+                  Concept: {flashcard.concept}
+                </p>
+              </div>
+            )}
             <p className="text-sm text-blue-200 mt-6">Click to flip back</p>
           </div>
         </div>

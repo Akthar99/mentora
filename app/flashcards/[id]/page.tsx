@@ -6,11 +6,14 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import Header from '@/components/Header';
 import FlashcardView from '@/components/FlashcardView';
 import { Flashcard, Project } from '@/types';
-import { flashcardsApi, projectsApi } from '@/services/api';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/firebase/firebaseClient';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function FlashcardPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
   const projectId = params.id as string;
 
   const [project, setProject] = useState<Project | null>(null);
@@ -19,17 +22,40 @@ export default function FlashcardPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadData();
-  }, [projectId]);
+    if (user && projectId) {
+      loadData();
+    }
+  }, [projectId, user]);
 
   const loadData = async () => {
     try {
       setIsLoading(true);
-      const [projectData, flashcardsData] = await Promise.all([
-        projectsApi.getById(projectId),
-        flashcardsApi.getByProjectId(projectId),
-      ]);
-      setProject(projectData);
+      
+      // Load project
+      const projectRef = doc(db, 'projects', projectId);
+      const projectSnap = await getDoc(projectRef);
+      
+      if (projectSnap.exists()) {
+        const projectData = {
+          id: projectSnap.id,
+          ...projectSnap.data()
+        } as Project;
+        setProject(projectData);
+      }
+      
+      // Load flashcards for this project
+      const flashcardsRef = collection(db, 'flashcards');
+      const q = query(flashcardsRef, where('projectId', '==', projectId));
+      const flashcardsSnap = await getDocs(q);
+      
+      const flashcardsData: Flashcard[] = [];
+      flashcardsSnap.forEach((doc) => {
+        flashcardsData.push({
+          id: doc.id,
+          ...doc.data()
+        } as Flashcard);
+      });
+      
       setFlashcards(flashcardsData);
     } catch (error) {
       console.error('Error loading flashcards:', error);
@@ -53,11 +79,11 @@ export default function FlashcardPage() {
 
       <main className="max-w-4xl mx-auto px-6 py-12">
         <button
-          onClick={() => router.push('/')}
+          onClick={() => router.push('/dashboard')}
           className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-8 transition"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span className="font-medium">Back to Projects</span>
+          <span className="font-medium">Back to Dashboard</span>
         </button>
 
         {isLoading ? (

@@ -87,7 +87,7 @@ export default function PaperGrader() {
                           [questionId]: e.target.value
                         }))}
                         rows={3}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900"
                         placeholder="Enter student's answer..."
                       />
                     </div>
@@ -101,7 +101,7 @@ export default function PaperGrader() {
                           [questionId]: e.target.value
                         }))}
                         rows={3}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900"
                         placeholder="Enter correct answer..."
                       />
                     </div>
@@ -120,7 +120,7 @@ export default function PaperGrader() {
                             max_score: parseInt(e.target.value)
                           }
                         }))}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900"
                       />
                     </div>
 
@@ -136,7 +136,7 @@ export default function PaperGrader() {
                             keywords: e.target.value.split(',').map(k => k.trim()).filter(k => k)
                           }
                         }))}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900"
                         placeholder="key, concept, important"
                       />
                     </div>
