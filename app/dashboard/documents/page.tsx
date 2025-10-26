@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext'; // ✅ Correct import
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 interface DocumentChunk {
@@ -25,16 +27,23 @@ export default function DocumentsPage() {
   const [viewingDocument, setViewingDocument] = useState<DocumentViewData | null>(null);
   const [loadingDocument, setLoadingDocument] = useState(false);
   const { user } = useAuth(); // ✅ Correct: at component level
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get('projectId');
 
   useEffect(() => {
     if (user) {
       fetchDocuments();
     }
-  }, [user]); // ✅ Add user dependency
+  }, [user, projectId]); // ✅ Add projectId dependency
 
   const fetchDocuments = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/api/dashboard/${user?.uid}`);
+      const url = projectId 
+        ? `http://localhost:8000/api/dashboard/${user?.uid}?project_id=${projectId}`
+        : `http://localhost:8000/api/dashboard/${user?.uid}`;
+      
+      const response = await fetch(url);
       const data = await response.json();
       
       if (data.success) {
@@ -50,7 +59,11 @@ export default function DocumentsPage() {
   const handleViewDocument = async (docId: string) => {
     try {
       setLoadingDocument(true);
-      const response = await fetch(`http://localhost:8000/api/document-chunks/${user?.uid}/${docId}`);
+      const url = projectId
+        ? `http://localhost:8000/api/document-chunks/${user?.uid}/${docId}?session_id=default&project_id=${projectId}`
+        : `http://localhost:8000/api/document-chunks/${user?.uid}/${docId}`;
+      
+      const response = await fetch(url);
       const data: DocumentViewData = await response.json();
       
       if (data.success) {
@@ -143,27 +156,35 @@ export default function DocumentsPage() {
           </div>
         )}
 
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">My Documents</h1>
+        <button
+          onClick={() => router.back()}
+          className="text-gray-700 hover:text-gray-900 mb-4 sm:mb-6 flex items-center gap-2 font-medium text-sm sm:text-base"
+        >
+          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+          Back
+        </button>
+
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">My Documents</h1>
           <Link
             href="/dashboard/upload"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium w-full sm:w-auto text-center"
           >
             Upload New Document
           </Link>
         </div>
 
         {documents.length === 0 ? (
-          <div className="bg-white shadow rounded-lg p-8 text-center">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="bg-white shadow rounded-lg p-6 sm:p-8 text-center">
+            <svg className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <h3 className="mt-2 text-sm font-medium text-gray-900">No documents</h3>
-            <p className="mt-1 text-sm text-gray-500">Get started by uploading your first document.</p>
-            <div className="mt-6">
+            <p className="mt-1 text-xs sm:text-sm text-gray-500">Get started by uploading your first document.</p>
+            <div className="mt-4 sm:mt-6">
               <Link
                 href="/dashboard/upload"
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                className="inline-flex items-center px-3 sm:px-4 py-2 border border-transparent shadow-sm text-xs sm:text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
               >
                 Upload Document
               </Link>
@@ -174,28 +195,28 @@ export default function DocumentsPage() {
             <ul className="divide-y divide-gray-200">
               {documents.map((doc, index) => (
                 <li key={doc.id || index}>
-                  <div className="px-4 py-4 flex items-center justify-between sm:px-6">
-                    <div className="flex items-center">
+                  <div className="px-3 py-3 sm:px-4 sm:py-4 flex items-center justify-between gap-2 sm:gap-4">
+                    <div className="flex items-center min-w-0 flex-1">
                       <div className="flex-shrink-0">
-                        <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                       </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{doc.name || doc.filename || `Document ${index + 1}`}</div>
-                        <div className="text-sm text-gray-500">
-                          Uploaded {doc.upload_date ? new Date(doc.upload_date).toLocaleDateString() : 'Unknown date'}
+                      <div className="ml-3 sm:ml-4 min-w-0">
+                        <div className="text-xs sm:text-sm font-medium text-gray-900 truncate">{doc.name || doc.filename || `Document ${index + 1}`}</div>
+                        <div className="text-xs text-gray-500">
+                          {doc.upload_date ? new Date(doc.upload_date).toLocaleDateString() : 'Unknown date'}
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-xs text-gray-500 hidden sm:block">
                           Size: {doc.size ? `${(doc.size / 1024).toFixed(1)} KB` : 'Unknown'}
                         </div>
                       </div>
                     </div>
-                    <div className="flex space-x-2">
+                    <div className="flex gap-2 flex-shrink-0">
                       <button
                         onClick={() => handleViewDocument(doc.id)}
                         disabled={loadingDocument}
-                        className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white px-4 py-2 rounded-md text-sm font-medium transition"
+                        className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition"
                       >
                         {loadingDocument ? 'Loading...' : 'View'}
                       </button>

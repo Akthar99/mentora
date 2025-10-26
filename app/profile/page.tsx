@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Home, LogOut, Edit3, Save, X, Camera } from "lucide-react";
+import { Home, LogOut, Edit3, Save, X, Camera, CreditCard } from "lucide-react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "@/firebase/firebaseClient";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -135,6 +135,9 @@ export default function ProfilePage() {
           <a href="/dashboard" className="flex items-center gap-3 text-gray-700 hover:text-indigo-600 transition font-medium">
             <Home size={18} /> <span>Home</span>
           </a>
+          <a href="/billing" className="flex items-center gap-3 text-gray-700 hover:text-indigo-600 transition font-medium">
+            <CreditCard size={18} /> <span>Billing</span>
+          </a>
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 text-gray-700 hover:text-red-600 transition font-medium"
@@ -201,9 +204,9 @@ export default function ProfilePage() {
         )}
 
         {/* Profile section */}
-        <div className="space-y-8">
-          <div className="flex items-center gap-6">
-            <div className="relative h-28 w-28 rounded-full overflow-hidden border border-gray-300 shadow-md group">
+        <div className="space-y-6 sm:space-y-8">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+            <div className="relative h-20 w-20 sm:h-28 sm:w-28 rounded-full overflow-hidden border border-gray-300 shadow-md group">
               <Image
                 src={user?.photoURL || "/user-avatar.png"}
                 alt="Profile"
@@ -214,18 +217,19 @@ export default function ProfilePage() {
                 onClick={() => setShowImageModal(true)}
                 className="absolute inset-0 bg-black/40 text-white opacity-0 group-hover:opacity-100 transition flex items-center justify-center rounded-full"
               >
-                <Camera size={18} />
+                <Camera size={16} className="sm:hidden" />
+                <Camera size={18} className="hidden sm:block" />
               </button>
             </div>
 
-            <div>
-              <h2 className="text-xl font-semibold text-gray-800">{formData.fullName || user?.displayName || "New User"}</h2>
-              <p className="text-sm text-gray-500">{user?.email}</p>
+            <div className="text-center sm:text-left">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-800">{formData.fullName || user?.displayName || "New User"}</h2>
+              <p className="text-xs sm:text-sm text-gray-500">{user?.email}</p>
             </div>
           </div>
 
           {/* Form fields */}
-          <form className="grid grid-cols-1 gap-6 text-sm">
+          <form className="grid grid-cols-1 gap-4 sm:gap-6 text-sm">
             <InputField
               label="Full Name"
               value={formData.fullName}
@@ -255,16 +259,16 @@ export default function ProfilePage() {
           </form>
 
           {editing && (
-            <div className="flex justify-end gap-3 mt-8">
+            <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 mt-6 sm:mt-8">
               <button
                 onClick={() => setEditing(false)}
-                className="px-5 py-2 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 transition"
+                className="px-4 sm:px-5 py-2 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 transition text-sm sm:text-base w-full sm:w-auto"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
-                className="px-5 py-2 rounded-full bg-black text-white hover:bg-gray-800 flex items-center gap-2"
+                className="px-4 sm:px-5 py-2 rounded-full bg-black text-white hover:bg-gray-800 flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto"
               >
                 <Save size={16} />
                 Save Changes

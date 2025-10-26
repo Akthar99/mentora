@@ -23,6 +23,10 @@ interface UserData {
   email?: string;
   photoURL?: string;
   isPremium?: boolean;
+  plan?: string;
+  planPrice?: number;
+  upgradedAt?: string;
+  cancelledAt?: string;
   createdAt?: string;
   updatedAt?: string;
 }

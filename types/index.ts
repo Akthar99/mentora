@@ -10,6 +10,7 @@ export interface Project {
   updatedAt?: string;
   icon?: string;
   color?: string;
+  documents?: Document[]; // Array of documents in this project
 }
 
 export interface Flashcard {
@@ -28,4 +29,6 @@ export interface Document {
   size?: number;
   uploadDate: string;
   userId: string;
+  docId?: string; // Document ID from AI server (doc_user123_default_1234567890)
+  selected?: boolean; // Whether document is selected for AI operations
 }

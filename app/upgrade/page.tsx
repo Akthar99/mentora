@@ -1,8 +1,7 @@
 'use client';
 
-import { Check, X, Lock, Clock, Sparkles, TrendingUp } from 'lucide-react';
+import { Check, X, Lock, Clock, Sparkles, TrendingUp, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import Header from '@/components/Header';
 
 export default function UpgradePage() {
   const router = useRouter();
@@ -77,7 +76,15 @@ export default function UpgradePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <Header />
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Back Button */}
+        <button
+          onClick={() => router.push('/dashboard')}
+          className="text-gray-600 hover:text-gray-900 mb-4 flex items-center gap-2"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span>Back to Dashboard</span>
+        </button>
 
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="bg-blue-600 rounded-2xl p-8 mb-12 text-white">
@@ -89,7 +96,7 @@ export default function UpgradePage() {
               </p>
             </div>
             <button
-              onClick={() => router.push('/')}
+              onClick={() => router.push('/billing')}
               className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
             >
               Upgrade Now
@@ -194,7 +201,7 @@ export default function UpgradePage() {
               <button
                 onClick={() => {
                   if (tier.buttonVariant !== 'outline') {
-                    router.push('/mark-papers');
+                    router.push('/billing');
                   }
                 }}
                 className={`w-full py-3 rounded-lg font-semibold transition-colors ${
@@ -228,6 +235,7 @@ export default function UpgradePage() {
             ))}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

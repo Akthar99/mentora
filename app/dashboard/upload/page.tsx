@@ -1,9 +1,12 @@
 'use client';
 
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { ArrowLeft } from 'lucide-react';
+import { doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
+import { db } from '@/firebase/firebaseClient';
 
 export default function UploadDocument() {
   const [file, setFile] = useState<File | null>(null);
@@ -11,6 +14,8 @@ export default function UploadDocument() {
   const [subject, setSubject] = useState('');
   const [uploading, setUploading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get('projectId');
   const { user } = useAuth(); // ✅ Correct: at component level
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,12 +31,19 @@ export default function UploadDocument() {
     e.preventDefault();
     if (!file || !documentName || !subject || !user) return; // ✅ Check user exists
 
+    if (!projectId) {
+      alert('Project ID is required. Please access this page from a project.');
+      return;
+    }
+
     setUploading(true);
     const formData = new FormData();
     formData.append('file', file);
     formData.append('data', JSON.stringify({
       user_id: user.uid, // ✅ Use actual user ID
-      document_name: documentName
+      session_id: 'default',
+      document_name: documentName,
+      project_id: projectId // NEW: Include project_id
     }));
 
     try {
@@ -42,8 +54,31 @@ export default function UploadDocument() {
 
       if (response.ok) {
         const result = await response.json();
+        
+        // Save document to Firebase project
+        if (projectId && result.document_id) {
+          try {
+            const projectRef = doc(db, 'projects', projectId);
+            await updateDoc(projectRef, {
+              documents: arrayUnion({
+                id: result.document_id,
+                docId: result.document_id,
+                name: documentName,
+                uploadDate: new Date().toISOString(),
+                selected: true, // Default to selected
+                userId: user.uid,
+                projectId: projectId
+              }),
+              updatedAt: new Date().toISOString()
+            });
+          } catch (firebaseError) {
+            console.error('Error saving to Firebase:', firebaseError);
+            // Continue even if Firebase save fails
+          }
+        }
+        
         alert('Document uploaded successfully!');
-        router.push('/dashboard/documents');
+        router.push(`/dashboard/projects/${projectId}`);
       } else {
         throw new Error('Upload failed');
       }
@@ -58,6 +93,14 @@ export default function UploadDocument() {
   return (
     <div className="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
       <div className="px-4 py-6 sm:px-0">
+        <button
+          onClick={() => router.back()}
+          className="text-gray-700 hover:text-gray-900 mb-6 flex items-center gap-2 font-medium"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back
+        </button>
+
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6">Upload Document</h3>

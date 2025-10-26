@@ -47,6 +47,47 @@ body {
   filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6));
 }
 
+/* Print Styles for Exam Paper */
+@media print {
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #examPaper,
+  #examPaper * {
+    visibility: visible;
+  }
+
+  #examPaper {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  /* Ensure proper page breaks */
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  .page-break-after {
+    page-break-after: always;
+  }
+
+  .page-break-avoid {
+    page-break-inside: avoid;
+  }
+}
+
 button,
 a {
   cursor: pointer;

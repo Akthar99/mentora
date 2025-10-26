@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 
 interface GradingResult {
   scores: Record<string, { score: number; max_score: number; feedback: string }>;
@@ -15,6 +17,7 @@ export default function PaperGrader() {
   const [rubric, setRubric] = useState<Record<string, any>>({});
   const [gradingResult, setGradingResult] = useState<GradingResult | null>(null);
   const [grading, setGrading] = useState(false);
+  const router = useRouter();
 
   const addQuestion = () => {
     const questionId = `q${Object.keys(studentAnswers).length + 1}`;
@@ -59,6 +62,14 @@ export default function PaperGrader() {
   return (
     <div className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
       <div className="px-4 py-6 sm:px-0">
+        <button
+          onClick={() => router.back()}
+          className="text-gray-700 hover:text-gray-900 mb-6 flex items-center gap-2 font-medium"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back
+        </button>
+
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <div className="flex justify-between items-center mb-6">
